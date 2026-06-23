@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>DentalCase — 臨床推論トレーニング</title>
+<style>
+  :root{
+    --ink: #1b2a2e;
+    --ink-soft: #4a5d61;
+    --paper: #f7f5f0;
+    --panel: #ffffff;
+    --line: #dcd9d0;
+    --teal: #0f5e56;
+    --teal-deep: #0a3f3a;
+    --teal-pale: #e3eeec;
+    --amber: #c98a3a;
+    --amber-pale: #f6e9d7;
+    --red: #a23b32;
+    --red-pale: #f3e0dc;
+    --radius: 14px;
+    --shadow: 0 2px 10px rgba(27,42,46,0.06), 0 1px 2px rgba(27,42,46,0.08);
+    font-size: 16px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0; padding:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", -apple-system, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    height: 100%;
+  }
+
+  #app{
+    max-width: 480px;
+    height: 100vh;
+    height: 100dvh;
+    margin: 0 auto;
+    background: var(--paper);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .brand-mark{
+    font-family: "Georgia", "Hiragino Mincho ProN", serif;
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 14px 18px;
+    background: var(--teal-deep);
+    color: #fff;
+    position: sticky; top:0; z-index: 30;
+  }
+  .topbar .title{
+    font-size: 15px;
+    font-weight: 600;
+    display:flex; align-items:center; gap:8px;
+  }
+  .topbar .sub{
+    font-size: 11px;
+    opacity: 0.75;
+    margin-top: 2px;
+  }
+  .topbar button.icon-btn{
+    background: rgba(255,255,255,0.12);
+    border: none;
+    color: #fff;
+    width: 34px; height:34px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .topbar button.icon-btn:active{ background: rgba(255,255,255,0.22); }
+
+  .screen{
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    padding-bottom: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .screen.active{ display:flex; }
+
+  /* ---------- Login ---------- */
+  #screen-login{
+    justify-content: center;
+    align-items: center;
+    padding: 32px 28px;
+    overflow-y: auto;
+    background:
+      radial-gradient(circle at 18% 8%, rgba(15,94,86,0.10), transparent 45%),
+      var(--paper);
+  }
+  .login-card{
+    width: 100%;
+    max-width: 360px;
+  }
+  .login-logo{
+    display:flex; align-items:center; gap:10px;
+    margin-bottom: 6px;
+  }
+  .login-logo .mark{
+    width:42px; height:42px; border-radius: 11px;
+    background: var(--teal);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:20px;
+    font-family: Georgia, serif;
+    flex-shrink:0;
+  }
+  .login-logo .name{
+    font-size: 22px;
+    font-weight: 700;
+    font-family: "Georgia", "Hiragino Mincho ProN", serif;
+    color: var(--teal-deep);
+  }
+  .login-tagline{
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height:1.7;
+    margin: 6px 0 28px;
+  }
+  .role-toggle{
+    display:flex;
+    background: var(--teal-pale);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 18px;
+  }
+  .role-toggle button{
+    flex:1;
+    padding: 10px 0;
+    border:none;
+    background: transparent;
+    border-radius: 9px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--teal-deep);
+    cursor: pointer;
+  }
+  .role-toggle button.active{
+    background: var(--teal);
+    color:#fff;
+    box-shadow: var(--shadow);
+  }
+  .field{
+    margin-bottom: 14px;
+  }
+  .field label{
+    display:block;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .field input, .field select{
+    width: 100%;
+    padding: 13px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: #fff;
+    font-size: 15px;
+    color: var(--ink);
+    font-family: inherit;
+  }
+  .field input:focus, .field select:focus{
+    outline: 2px solid var(--teal);
+    outline-offset: 1px;
+  }
+  .btn-primary{
+    width:100%;
+    padding: 14px 0;
+    border-radius: 11px;
+    border:none;
+    background: var(--teal);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 6px;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary:active{ background: var(--teal-deep); }
+  .btn-secondary{
+    width:100%;
+    padding: 13px 0;
+    border-radius: 11px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .login-hint{
+    margin-top: 16px;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    background: var(--amber-pale);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+
+  /* ---------- Lists / cards ---------- */
+  .scroll-area{
+    flex:1;
+    min-height: 0;
+    overflow-y:auto;
+    padding: 16px 18px 90px;
+  }
+  .section-label{
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin: 18px 2px 10px;
+  }
+  .section-label:first-child{ margin-top: 2px; }
+
+  .case-card{
+    background: var(--panel);
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform .12s ease;
+  }
+  .case-card:active{ transform: scale(0.98); }
+  .case-card .top-row{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    margin-bottom: 8px;
+  }
+  .case-card .case-title{
+    font-size: 15.5px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .case-card .case-id{
+    font-size: 10.5px;
+    color: #fff;
+    background: var(--teal);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    white-space: nowrap;
+    margin-left: 8px;
+  }
+  .case-card .case-desc{
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .case-card .meta-row{
+    display:flex; gap:8px; margin-top:10px;
+  }
+  .tag{
+    font-size: 10.5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: var(--teal-pale);
+    color: var(--teal-deep);
+    font-weight: 600;
+  }
+  .tag.done{
+    background: var(--amber-pale);
+    color: #8a5a1c;
+  }
+
+  /* ---------- Case workspace ---------- */
+  .tabbar{
+    display:flex;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0;
+    z-index: 20;
+    flex-shrink: 0;
+  }
+  .tabbar button{
+    flex:1;
+    padding: 12px 0 10px;
+    border:none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+  }
+  .tabbar button.active{
+    color: var(--teal-deep);
+    border-bottom-color: var(--teal);
+  }
+
+  .tab-panel{ display:none; flex:1; flex-direction:column; min-height:0; }
+  .tab-panel.active{ display:flex; }
+
+  /* patient brief */
+  .brief-box{
+    margin: 14px 18px 0;
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+    flex-shrink: 0;
+  }
+  .brief-box .patient-name{
+    font-size: 15px; font-weight:700;
+  }
+  .brief-box .patient-meta{
+    font-size: 12px; color: var(--ink-soft); margin-top:2px;
+  }
+  .brief-box .chief-complaint{
+    margin-top:10px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    background: var(--teal-pale);
+    border-radius: 9px;
+    padding: 10px 12px;
+    color: var(--teal-deep);
+  }
+
+  /* chat */
+  #chat-log{
+    flex:1;
+    min-height: 0;
+    overflow-y:auto;
+    padding: 14px 16px 10px;
+    display:flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .msg{
+    max-width: 82%;
+    padding: 11px 14px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+  .msg.patient{
+    align-self: flex-start;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-bottom-left-radius: 4px;
+  }
+  .msg.student{
+    align-self: flex-end;
+    background: var(--teal);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .msg.system-note{
+    align-self: center;
+    background: var(--amber-pale);
+    color: #8a5a1c;
+    font-size: 12px;
+    border-radius: 10px;
+    text-align:center;
+  }
+  .typing-dots{
+    align-self:flex-start;
+    background:#fff;
+    border:1px solid var(--line);
+    padding: 12px 16px;
+    border-radius: 16px;
+    border-bottom-left-radius:4px;
+    display:flex; gap:4px;
+  }
+  .typing-dots span{
+    width:6px; height:6px; border-radius:50%;
+    background: var(--ink-soft);
+    opacity: .4;
+    animation: blink 1.2s infinite ease-in-out;
+  }
+  .typing-dots span:nth-child(2){ animation-delay: .2s; }
+  .typing-dots span:nth-child(3){ animation-delay: .4s; }
+  @keyframes blink{ 0%,80%,100%{opacity:.25;} 40%{opacity:1;} }
+
+  .chat-input-row{
+    display:flex;
+    gap: 8px;
+    padding: 10px 14px;
+    background: #fff;
+    border-top: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .chat-input-row textarea{
+    flex:1;
+    resize:none;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-family: inherit;
+    max-height: 90px;
+    line-height: 1.4;
+  }
+  .chat-input-row textarea:focus{ outline: 1.5px solid var(--teal); }
+
+  /* ---------- Voice mode ---------- */
+  .voice-mode-row{
+    display:flex; align-items:center; justify-content:space-between;
+    margin: 10px 18px 0;
+    padding: 10px 14px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    flex-shrink: 0;
+  }
+  .voice-mode-label{
+    display:flex; align-items:center; gap:7px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .voice-mode-label .vm-icon{ font-size: 15px; }
+  .switch{ position: relative; display:inline-block; width: 44px; height: 26px; flex-shrink:0; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .switch-track{
+    position:absolute; inset:0;
+    background: var(--line);
+    border-radius: 999px;
+    transition: background .15s;
+    cursor:pointer;
+  }
+  .switch-thumb{
+    position:absolute;
+    width: 20px; height:20px;
+    left: 3px; top:3px;
+    background:#fff;
+    border-radius:50%;
+    transition: transform .15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  }
+  .switch input:checked + .switch-track{ background: var(--teal); }
+  .switch input:checked + .switch-track .switch-thumb{ transform: translateX(18px); }
+
+  .mic-btn{
+    width: 42px; height:42px;
+    border-radius: 50%;
+    border: 1.5px solid var(--teal);
+    background: #fff;
+    color: var(--teal);
+    font-size: 18px;
+    cursor:pointer;
+    flex-shrink:0;
+    display:none; /* 音声モードON時のみ表示 */
+    align-items:center; justify-content:center;
+  }
+  .mic-btn.listening{
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+    animation: mic-pulse 1.1s infinite;
+  }
+  @keyframes mic-pulse{
+    0%{ box-shadow: 0 0 0 0 rgba(162,59,50,0.45); }
+    70%{ box-shadow: 0 0 0 10px rgba(162,59,50,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(162,59,50,0); }
+  }
+  .voice-mode-on .mic-btn{ display:flex; }
+  .voice-mode-on #chat-input{ flex:1; }
+
+  .voice-status-note{
+    text-align:center;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    padding: 4px 0 2px;
+    display:none;
+  }
+  .voice-mode-on .voice-status-note{ display:block; }
+
+  .speak-btn{
+    border:none;
+    background: var(--teal-pale);
+    color: var(--teal-deep);
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    font-size: 12px;
+    cursor:pointer;
+    flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    margin-top: 6px;
+  }
+  .speak-btn.speaking{
+    background: var(--teal);
+    color:#fff;
+  }
+  .msg-with-audio{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    max-width: 82%;
+    align-self: flex-start;
+  }
+
+  .send-btn{
+    width: 42px; height:42px;
+    border-radius: 50%;
+    border:none;
+    background: var(--teal);
+    color:#fff;
+    font-size: 17px;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .send-btn:disabled{ background: #b7c4c2; }
+
+  .quick-row{
+    display:flex; gap:6px; padding: 0 14px 10px; overflow-x:auto;
+    flex-shrink: 0;
+  }
+  .quick-chip{
+    white-space:nowrap;
+    font-size: 11.5px;
+    padding: 7px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--teal);
+    color: var(--teal-deep);
+    background: var(--teal-pale);
+    cursor:pointer;
+    flex-shrink:0;
+  }
+
+  /* images tab */
+  .image-grid{
+    padding: 16px;
+    display:flex; flex-direction:column; gap:16px;
+    overflow-y:auto;
+  }
+  .image-card{
+    background: var(--panel);
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+  .image-card .img-wrap{
+    background: #11181a;
+    display:flex; justify-content:center; align-items:center;
+    padding: 10px;
+  }
+  .image-card .img-wrap svg{ width:100%; height:auto; display:block; }
+  .image-card .img-caption{
+    padding: 11px 14px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+  .image-card .img-caption b{ color: var(--ink); }
+  .lock-note{
+    margin: 4px 16px 0;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    background: var(--amber-pale);
+    padding: 9px 12px;
+    border-radius: 9px;
+  }
+
+  /* diagnosis form */
+  .diag-form{
+    padding: 16px 18px 100px;
+    overflow-y:auto;
+    flex:1;
+  }
+  .diag-form label{
+    display:block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--teal-deep);
+    margin: 16px 0 6px;
+  }
+  .diag-form label:first-child{ margin-top:0; }
+  .diag-form textarea, .diag-form input[type=text]{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 13px;
+    font-size: 14px;
+    font-family: inherit;
+    line-height:1.6;
+    resize: vertical;
+  }
+  .diag-form textarea:focus, .diag-form input:focus{ outline:1.5px solid var(--teal); }
+  .diag-hint{
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    line-height:1.5;
+  }
+  .submit-bar{
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(to top, var(--paper) 70%, transparent);
+    padding: 14px 18px 4px;
+  }
+
+  /* evaluation result */
+  .eval-wrap{
+    padding: 18px;
+    overflow-y:auto;
+    flex:1;
+  }
+  .score-hero{
+    background: var(--teal-deep);
+    color:#fff;
+    border-radius: 18px;
+    padding: 22px 20px;
+    text-align:center;
+    margin-bottom: 18px;
+  }
+  .score-hero .score-num{
+    font-size: 46px;
+    font-weight: 800;
+    font-family: Georgia, serif;
+    line-height:1;
+  }
+  .score-hero .score-label{
+    font-size: 12px;
+    opacity:.8;
+    margin-top:4px;
+    letter-spacing:0.04em;
+  }
+  .eval-section{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 15px 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .eval-section h4{
+    margin:0 0 8px;
+    font-size: 13.5px;
+    color: var(--teal-deep);
+    display:flex; align-items:center; gap:6px;
+  }
+  .eval-section p, .eval-section li{
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .eval-section.good h4{ color: #2c7a4b; }
+  .eval-section.warn h4{ color: var(--amber); }
+  .eval-section ul{ margin: 0; padding-left: 18px; }
+
+  /* teacher dashboard */
+  .student-row{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+    cursor:pointer;
+  }
+  .student-row .top-row{ display:flex; justify-content:space-between; align-items:center; }
+  .student-row .s-name{ font-weight:700; font-size:14.5px; }
+  .student-row .s-meta{ font-size:11.5px; color:var(--ink-soft); margin-top:3px;}
+  .student-row .avg-pill{
+    font-size: 12px;
+    font-weight:700;
+    padding: 5px 11px;
+    border-radius: 20px;
+    background: var(--teal-pale);
+    color: var(--teal-deep);
+  }
+  .log-entry{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+  .log-entry .log-head{
+    padding: 13px 15px;
+    display:flex; justify-content:space-between; align-items:center;
+    cursor:pointer;
+  }
+  .log-entry .log-head .lt{ font-size:13.5px; font-weight:700; }
+  .log-entry .log-head .ld{ font-size:11px; color:var(--ink-soft); margin-top:2px;}
+  .log-entry .log-body{
+    display:none;
+    padding: 0 15px 15px;
+    border-top: 1px solid var(--line);
+  }
+  .log-entry.open .log-body{ display:block; }
+  .log-entry .chevron{ transition: transform .15s; color: var(--ink-soft); }
+  .log-entry.open .chevron{ transform: rotate(90deg); }
+  .mini-chat-line{
+    font-size: 12.5px;
+    padding: 7px 0;
+    border-bottom: 1px dashed var(--line);
+    line-height:1.5;
+  }
+  .mini-chat-line:last-child{ border-bottom:none; }
+  .mini-chat-line b{ color: var(--teal-deep); }
+
+  /* empty / loading states */
+  .empty-state{
+    flex:1;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding: 40px 30px;
+    text-align:center;
+    color: var(--ink-soft);
+  }
+  .empty-state .e-icon{ font-size: 34px; margin-bottom:10px; }
+  .empty-state .e-title{ font-size:14px; font-weight:700; color:var(--ink); margin-bottom:6px;}
+  .empty-state .e-desc{ font-size:12.5px; line-height:1.6; }
+
+  .loading-spinner{
+    width:18px;height:18px;border-radius:50%;
+    border: 2.5px solid rgba(255,255,255,0.4);
+    border-top-color:#fff;
+    animation: spin 0.7s linear infinite;
+    display:inline-block;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  .api-key-banner{
+    margin: 12px 16px 0;
+    background: var(--red-pale);
+    color: var(--red);
+    font-size: 12px;
+    padding: 10px 13px;
+    border-radius: 10px;
+    line-height:1.6;
+  }
+
+  /* bottom nav (student) */
+  .bottom-nav{
+    display:flex;
+    background: #fff;
+    border-top: 1px solid var(--line);
+    position: sticky;
+    bottom:0;
+    z-index: 25;
+    flex-shrink: 0;
+  }
+  .bottom-nav button{
+    flex:1;
+    border:none;
+    background:transparent;
+    padding: 10px 0 8px;
+    font-size: 10.5px;
+    font-weight:600;
+    color: var(--ink-soft);
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    cursor:pointer;
+  }
+  .bottom-nav button .bn-icon{ font-size: 18px; }
+  .bottom-nav button.active{ color: var(--teal-deep); }
+
+  ::-webkit-scrollbar{ width:0; height:0; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ LOGIN ============ -->
+  <div class="screen active" id="screen-login">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="mark">D</div>
+        <div class="name">DentalCase</div>
+      </div>
+      <div class="login-tagline">AI模擬患者を相手に問診・診断トレーニングを行う臨床推論学習アプリです。</div>
+
+      <div class="role-toggle">
+        <button id="role-student" class="active">学生としてログイン</button>
+        <button id="role-teacher">教員としてログイン</button>
+      </div>
+
+      <div class="field">
+        <label id="label-name">氏名 / 学籍番号</label>
+        <input type="text" id="login-name" placeholder="例）山田 太郎">
+      </div>
+      <div class="field">
+        <label>パスワード</label>
+        <input type="text" id="login-pass" placeholder="任意の文字列でOK（デモ用）">
+      </div>
+      <button class="btn-primary" id="btn-login">ログイン</button>
+      <div class="login-hint">これはプロトタイプです。入力内容の検証は行わず、どなたでもログインできます。学生・教員はロール選択で切り替えてください。</div>
+    </div>
+  </div>
+
+  <!-- ============ STUDENT: CASE LIST ============ -->
+  <div class="screen" id="screen-case-list">
+    <div class="topbar">
+      <div>
+        <div class="title">📋 症例を選択</div>
+        <div class="sub" id="student-welcome">学生</div>
+      </div>
+      <button class="icon-btn" id="btn-logout-1" title="ログアウト">⎋</button>
+    </div>
+    <div class="scroll-area" id="case-list-scroll">
+      <div class="section-label">本日の症例</div>
+      <!-- cards injected by JS -->
+    </div>
+  </div>
+
+  <!-- ============ STUDENT: CASE WORKSPACE ============ -->
+  <div class="screen" id="screen-case-workspace">
+    <div class="topbar">
+      <div>
+        <div class="title" id="ws-case-title">症例</div>
+        <div class="sub" id="ws-case-sub"></div>
+      </div>
+      <button class="icon-btn" id="btn-back-to-list" title="症例一覧へ">←</button>
+    </div>
+    <div class="tabbar">
+      <button class="tab-btn active" data-tab="interview">問診</button>
+      <button class="tab-btn" data-tab="images">口腔内・X線</button>
+      <button class="tab-btn" data-tab="diagnosis">診断・治療方針</button>
+    </div>
+
+    <!-- Interview tab -->
+    <div class="tab-panel active" id="panel-interview">
+      <div class="brief-box" id="brief-box"></div>
+      <div class="voice-mode-row">
+        <div class="voice-mode-label">
+          <span class="vm-icon">🎙️</span>
+          <span>音声モード</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="voice-mode-toggle">
+          <span class="switch-track"><span class="switch-thumb"></span></span>
+        </label>
+      </div>
+      <div id="chat-log"></div>
+      <div class="quick-row" id="quick-row"></div>
+      <div class="chat-input-row">
+        <button class="mic-btn" id="btn-mic" title="音声入力">🎤</button>
+        <textarea id="chat-input" rows="1" placeholder="患者さんへの質問を入力…（例：いつから痛みますか？）"></textarea>
+        <button class="send-btn" id="btn-send">➤</button>
+      </div>
+    </div>
+
+    <!-- Images tab -->
+    <div class="tab-panel" id="panel-images">
+      <div class="image-grid" id="image-grid"></div>
+    </div>
+
+    <!-- Diagnosis tab -->
+    <div class="tab-panel" id="panel-diagnosis">
+      <div class="diag-form">
+        <label>① 鑑別診断（考えられる疾患を記載）</label>
+        <textarea id="diag-differential" rows="3" placeholder="例：急性歯髄炎、慢性根尖性歯周炎 など"></textarea>
+
+        <label>② 最も可能性の高い診断（確定診断）</label>
+        <input type="text" id="diag-final" placeholder="例：急性化膿性歯髄炎（46）">
+
+        <label>③ 診断の根拠</label>
+        <textarea id="diag-rationale" rows="4" placeholder="問診・視診・画像所見からどのように診断に至ったかを記載してください"></textarea>
+
+        <label>④ 治療方針</label>
+        <textarea id="diag-plan" rows="4" placeholder="例：浸潤麻酔下での抜髄、根管治療の開始 など、具体的な処置を記載してください"></textarea>
+        <div class="diag-hint">問診タブ・画像タブで得た情報をもとに記入してください。記入後「AIによる評価を受ける」を押すと、内容をAIが評価します。</div>
+      </div>
+      <div class="submit-bar">
+        <button class="btn-primary" id="btn-submit-diag">AIによる評価を受ける</button>
+      </div>
+    </div>
+
+    <!-- Bottom nav -->
+    <div class="bottom-nav">
+      <button class="bn-tab active" data-tab="interview"><span class="bn-icon">💬</span>問診</button>
+      <button class="bn-tab" data-tab="images"><span class="bn-icon">🩻</span>画像</button>
+      <button class="bn-tab" data-tab="diagnosis"><span class="bn-icon">📝</span>診断</button>
+    </div>
+  </div>
+
+  <!-- ============ STUDENT: EVALUATION RESULT ============ -->
+  <div class="screen" id="screen-evaluation">
+    <div class="topbar">
+      <div>
+        <div class="title">🩺 AI評価結果</div>
+        <div class="sub" id="eval-case-sub"></div>
+      </div>
+      <button class="icon-btn" id="btn-eval-close" title="症例一覧へ">←</button>
+    </div>
+    <div class="eval-wrap" id="eval-wrap">
+      <!-- injected -->
+    </div>
+  </div>
+
+  <!-- ============ TEACHER: DASHBOARD ============ -->
+  <div class="screen" id="screen-teacher-dash">
+    <div class="topbar">
+      <div>
+        <div class="title">🎓 学習履歴ダッシュボード</div>
+        <div class="sub" id="teacher-welcome">教員</div>
+      </div>
+      <button class="icon-btn" id="btn-logout-2" title="ログアウト">⎋</button>
+    </div>
+    <div class="scroll-area" id="teacher-scroll">
+      <div class="section-label">学生一覧</div>
+      <div id="student-list"></div>
+    </div>
+  </div>
+
+  <!-- ============ TEACHER: STUDENT DETAIL ============ -->
+  <div class="screen" id="screen-teacher-detail">
+    <div class="topbar">
+      <div>
+        <div class="title" id="td-student-name">学生</div>
+        <div class="sub">学習履歴の詳細</div>
+      </div>
+      <button class="icon-btn" id="btn-teacher-back" title="一覧へ">←</button>
+    </div>
+    <div class="scroll-area" id="teacher-detail-scroll"></div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// 症例データ定義
+// 各症例には「AI患者として振る舞うためのシステムプロンプト」と
+// 「教員/評価AI向けの正解情報」を持たせる。
+// ============================================================
+
+const CASES = [
+  {
+    id: "C01",
+    title: "右下臼歯部の自発痛",
+    shortDesc: "3日前からの右下のズキズキする痛みを主訴に来院した28歳男性。",
+    patientName: "佐藤 健一（28歳・男性）",
+    chiefComplaint: "3日前から右下の奥歯がズキズキ痛む。夜になると痛みが強くなり眠れなかった。",
+    tags: ["歯髄炎疑い", "初級"],
+    // AI患者の人格・設定（system prompt）
+    patientSystemPrompt: `あなたは歯科医院を受診した患者「佐藤健一（28歳・男性、会社員）」として振る舞ってください。
+これは歯学部学生の問診トレーニング用シミュレーションです。学生（歯科医師役）からの質問に、患者として一貫性のある自然な日本語で答えてください。
+
+【あなたの症状設定（必ず一致させること）】
+- 主訴：3日前から右下の奥歯（下顎右側第一大臼歯、46番相当）がズキズキと拍動するように痛む
+- 痛みの性質：自発痛があり、特に夜間〜臥位で増悪する。冷たいものでは一瞬痛むがすぐ治まる。温かいものでは痛みが増し、しばらく続く（温熱痛が持続するのが特徴）
+- 痛みの強さ：10段階で7〜8程度、市販の鎮痛剤（ロキソニン）を飲むと一時的に軽減する
+- 既往：その歯は2年前に大きな虫歯治療（レジン充填）をした。最近、その歯で硬いものを噛むと一瞬しみる感じがあった
+- 自発痛が出始めたのはこの3日。それ以前は時々しみる程度だった
+- 発熱や顔の腫れは今のところない（聞かれたら「腫れはないと思います」と答える）
+- 歯磨きはきちんとしている。歯周病的な症状（歯ぐきからの出血、歯の動揺）は特にない
+- 過去に同じような激しい痛みの経験はない
+- 何もしていなくてもズキズキする「拍動性の自発痛」と「温熱痛の持続」がこの症例のコア所見。これは急性歯髄炎（特に化膿性歯髄炎）を示唆する典型像である
+
+【振る舞いのルール】
+- 必ず患者本人として一人称で答える。AIであることや「シミュレーションです」などのメタな発言は絶対にしない
+- 歯科の専門用語（歯髄炎、根管など）は使わない。あくまで一般の患者として、痛みの様子や生活への影響を自分の言葉で説明する
+- 学生から聞かれていないことを先回りして全部話さない。聞かれたことに答え、関連する情報は自然に少しだけ付け加える程度にする
+- 痛みの場所を聞かれたら「右下の奥のほう」と答え、的確に聞かれれば「2年前に詰め物をした歯のあたり」と答える
+- 不安げな様子や、早く治療してほしい気持ちも自然に表現してよい
+- 学生の質問が曖昧な場合は、患者として聞き返してもよい（例：「どんな感じの痛みか、ということですか？」）
+- 回答は2〜4文程度の自然な会話の長さにする。長すぎる説明文にしない`,
+    // 正解・評価基準（評価AIへの参考情報として渡す）
+    correctDiagnosis: "急性歯髄炎（化膿性歯髄炎）。原因歯は46（下顎右側第一大臼歯）。2年前のレジン充填部からの二次カリエスの進行による歯髄への炎症波及が疑われる。",
+    keyFindings: [
+      "自発痛（拍動性）：歯髄炎を示唆する重要所見",
+      "温熱痛が持続する：歯髄の炎症が進行している（不可逆性歯髄炎）ことを示唆",
+      "冷水痛は一過性：可逆性段階を超えている可能性",
+      "夜間増悪：歯髄内圧上昇による典型像",
+      "2年前のレジン充填歴と最近の咬合時痛：二次カリエスから歯髄炎への進展経過と整合",
+      "発熱・腫脹なし：根尖性歯周炎やフェニックス膿瘍など重篤化はまだしていない可能性",
+    ],
+    idealQuestions: [
+      "痛みの部位（上下・左右・前後）",
+      "痛みの性質（自発痛か誘発痛か、拍動性かどうか）",
+      "温熱・冷水刺激への反応とその持続時間",
+      "痛みの経過・期間・増悪因子（夜間・臥位）",
+      "既往歴（過去の治療歴）",
+      "発熱・腫脹の有無（炎症の波及範囲の確認）",
+    ],
+    images: [
+      {
+        type: "intraoral",
+        title: "口腔内写真（右下臼歯部）",
+        caption: "46番（下顎右側第一大臼歯）の咬合面に既存のレジン充填が見られる。充填物辺縁にわずかな着色と段差を認める。歯肉の発赤・腫脹は明らかではない。",
+        svgKey: "intraoral_case1"
+      },
+      {
+        type: "xray",
+        title: "デンタルX線写真（46番）",
+        caption: "46番咬合面〜近心隣接面にかけて、充填物下に二次カリエスを疑うX線透過像を認める。う窩は歯髄腔に近接しており、歯髄への炎症波及が疑われる。根尖部に明らかな透過像は認めない。",
+        svgKey: "xray_case1"
+      }
+    ]
+  },
+  {
+    id: "C02",
+    title: "前歯部打撲後の変色",
+    shortDesc: "2ヶ月前に転倒し前歯を打撲。最近、その歯の色が変わってきたと来院した16歳女性。",
+    patientName: "田中 美咲（16歳・女子高校生）",
+    chiefComplaint: "2ヶ月前に部活中に転んで前歯を強くぶつけた。最近、その歯がだんだん黒っぽく（グレーに）なってきた気がする。",
+    tags: ["外傷後失活疑い", "中級"],
+    patientSystemPrompt: `あなたは歯科医院を受診した患者「田中美咲（16歳・女子高校生、バスケットボール部）」として振る舞ってください。
+これは歯学部学生の問診トレーニング用シミュレーションです。学生（歯科医師役）からの質問に、患者として一貫性のある自然な日本語で答えてください（10代らしい、やや砕けた言葉遣いでもよい）。
+
+【あなたの症状設定（必ず一致させること）】
+- 主訴：約2ヶ月前、バスケの練習中に転倒し顔を打ち、上の前歯（左上1番、11番相当）を強くぶつけた
+- 受傷時：その場で出血があり、歯が少し動いた・浮いたような感じがあったが、歯が抜けたり折れたりはしなかった。痛みはあったが数日で治まった
+- 当時は歯科を受診せず、様子を見ていた（これは重要な情報なので、聞かれたら答える）
+- 現在の症状：受傷から1ヶ月ほど経った頃から、その歯の色が徐々に灰色〜茶色っぽく変色してきたことに自分で気づいた。痛みは今はない
+- 冷たいものを飲んでも、その歯だけ「あまり感じない」気がする（健全な歯と比べて知覚が鈍い＝歯髄壊死を示唆する重要所見。聞かれたら答える）
+- 叩いた時の感じ（打診）について聞かれたら「軽く叩かれても特に痛くない」と答える
+- 歯ぐきに腫れやニキビのようなできもの（瘻孔）があるか聞かれたら「言われてみると、その歯の歯ぐきに小さいプツッとした出来物がある気がする」と答える（根尖病変・瘻孔形成を示唆）
+- 見た目の変化を気にしており、「写真撮るときに気になる」など心理的な訴えも自然に表現する
+- 受傷から受診までの期間が空いていることに少し気まずさを感じている（部活が忙しかった、痛くなかったから様子を見ていた、等の理由を聞かれたら答える）
+
+【振る舞いのルール】
+- 必ず患者本人として一人称で答える。AIであることやメタな発言は絶対にしない
+- 歯科専門用語（歯髄壊死、瘻孔など）は使わない。一般の患者の言葉で表現する
+- 聞かれていないことを先回りして全部話さない。聞かれたことに答え、関連情報は自然に少しだけ付け加える
+- 10代らしい話し方（「〜です」「〜だと思います」に時々カジュアルな言葉が混ざる程度）で良いが、丁寧さは保つ
+- 回答は2〜4文程度の自然な会話の長さにする`,
+    correctDiagnosis: "外傷性歯髄壊死（11番）。慢性根尖性歯周炎の合併（瘻孔形成あり）。",
+    keyFindings: [
+      "外傷の既往（2ヶ月前の打撲）と受診までの期間：受傷後しばらく経って症状が顕在化する経過は歯髄壊死の典型",
+      "歯の変色（灰色〜茶色）：歯髄内出血・壊死による特徴的な変色所見",
+      "温度刺激への反応低下（電気歯髄診断相当の所見）：歯髄生活反応の消失を示唆",
+      "打診への反応が乏しい：急性炎症期を過ぎている、あるいは慢性化していることを示唆",
+      "歯肉の瘻孔（できもの）：慢性根尖性歯周炎の存在を強く示唆する所見。X線での根尖透過像と合わせて確定的",
+      "受傷直後に受診していない病歴：外傷後の経過観察が不十分だったことが今回の遅発性合併症につながった可能性",
+    ],
+    idealQuestions: [
+      "受傷の経緯・受傷時の状況（出血、歯の動揺の有無）",
+      "受傷後から現在までの症状の経過",
+      "受診の遅れの理由（受診行動の確認）",
+      "現在の自覚症状（痛みの有無、知覚の変化）",
+      "歯肉の状態（腫れ・瘻孔の有無）",
+      "色調変化の自覚時期と進行",
+    ],
+    images: [
+      {
+        type: "intraoral",
+        title: "口腔内写真（上顎前歯部）",
+        caption: "11番（上顎左側中切歯）に灰白色〜褐色の変色を認める。隣接する21番と比較して明らかな色調の差がある。歯冠の破折・欠損は認めない。歯肉辺縁にわずかな腫脹を認める。",
+        svgKey: "intraoral_case2"
+      },
+      {
+        type: "xray",
+        title: "デンタルX線写真（11番）",
+        caption: "11番根尖部に境界明瞭な透過像を認める。歯根の吸収・破折は明らかではない。歯髄腔の狭窄は認めない。隣在歯との比較で根尖部透過像の存在が確認できる。",
+        svgKey: "xray_case2"
+      }
+    ]
+  }
+];
+
+// ------------------------------------------------------------
+// SVGビジュアル（簡易模式図として作成。実写は使用しない）
+// ------------------------------------------------------------
+const CASE_IMAGES_SVG = {
+
+  intraoral_case1: `
+  <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="220" fill="#1b0f0d"/>
+    <ellipse cx="180" cy="115" rx="170" ry="95" fill="#7a3b35"/>
+    <ellipse cx="180" cy="115" rx="150" ry="78" fill="#9b4f43"/>
+    <!-- gums -->
+    <path d="M30 110 Q180 60 330 110 L330 150 Q180 105 30 150 Z" fill="#c9696a"/>
+    <!-- teeth row -->
+    <g>
+      <rect x="55" y="95" width="34" height="46" rx="6" fill="#f3ead9"/>
+      <rect x="92" y="92" width="34" height="50" rx="6" fill="#f3ead9"/>
+      <rect x="129" y="90" width="36" height="54" rx="6" fill="#f0e3cb"/>
+      <!-- target tooth with filling -->
+      <rect x="168" y="88" width="40" height="58" rx="7" fill="#f0e3cb" stroke="#c98a3a" stroke-width="2"/>
+      <rect x="176" y="96" width="24" height="20" rx="4" fill="#8a8a8a"/>
+      <rect x="211" y="90" width="36" height="54" rx="6" fill="#f0e3cb"/>
+      <rect x="250" y="93" width="34" height="49" rx="6" fill="#f3ead9"/>
+      <rect x="287" y="97" width="32" height="44" rx="6" fill="#f3ead9"/>
+    </g>
+    <text x="180" y="180" text-anchor="middle" fill="#e8c9a0" font-size="13" font-family="sans-serif">下顎右側臼歯部　咬合面観</text>
+    <text x="188" y="80" text-anchor="middle" fill="#c98a3a" font-size="11" font-family="sans-serif">▼ 46 既存充填</text>
+  </svg>`,
+
+  xray_case1: `
+  <svg viewBox="0 0 360 240" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="240" fill="#06090a"/>
+    <!-- teeth silhouettes -->
+    <g fill="#cfd6d4" opacity="0.92">
+      <rect x="40" y="40" width="40" height="120" rx="10"/>
+      <rect x="85" y="35" width="42" height="128" rx="10"/>
+      <rect x="132" y="32" width="44" height="134" rx="11"/>
+      <rect x="181" y="30" width="46" height="138" rx="12"/>
+      <rect x="232" y="33" width="44" height="132" rx="11"/>
+      <rect x="280" y="38" width="42" height="124" rx="10"/>
+    </g>
+    <!-- target tooth root canal hint -->
+    <rect x="181" y="30" width="46" height="138" rx="12" fill="none" stroke="#c98a3a" stroke-width="2.5"/>
+    <!-- caries radiolucency near pulp -->
+    <ellipse cx="200" cy="78" rx="12" ry="16" fill="#06090a" opacity="0.85"/>
+    <ellipse cx="200" cy="78" rx="12" ry="16" fill="none" stroke="#7a2f28" stroke-width="1.5"/>
+    <!-- restoration (radiopaque) -->
+    <rect x="190" y="42" width="26" height="18" rx="3" fill="#f2f2f2"/>
+    <!-- root area, no apical lesion -->
+    <ellipse cx="204" cy="150" rx="16" ry="10" fill="none" stroke="#3a4543" stroke-width="1"/>
+    <text x="180" y="210" text-anchor="middle" fill="#9fb0ad" font-size="12" font-family="sans-serif">デンタルX線　46番　近遠心方向</text>
+    <text x="245" y="78" fill="#c98a3a" font-size="11" font-family="sans-serif">◀ 二次カリエス透過像</text>
+  </svg>`,
+
+  intraoral_case2: `
+  <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="220" fill="#1b0f0d"/>
+    <ellipse cx="180" cy="115" rx="170" ry="95" fill="#7a3b35"/>
+    <ellipse cx="180" cy="115" rx="150" ry="78" fill="#9b4f43"/>
+    <path d="M30 100 Q180 55 330 100 L330 145 Q180 100 30 145 Z" fill="#c9696a"/>
+    <!-- small fistula bump on gum near target tooth -->
+    <circle cx="190" cy="108" r="4.5" fill="#e8a3a0"/>
+    <g>
+      <rect x="60" y="92" width="38" height="58" rx="8" fill="#f3ead9"/>
+      <rect x="100" y="88" width="40" height="64" rx="9" fill="#f3ead9"/>
+      <!-- discolored central incisor -->
+      <rect x="142" y="86" width="42" height="66" rx="9" fill="#9b8266" stroke="#5e4a36" stroke-width="1.5"/>
+      <rect x="186" y="86" width="42" height="66" rx="9" fill="#f5ecdb"/>
+      <rect x="230" y="89" width="40" height="62" rx="9" fill="#f3ead9"/>
+      <rect x="272" y="93" width="38" height="56" rx="8" fill="#f3ead9"/>
+    </g>
+    <text x="180" y="180" text-anchor="middle" fill="#e8c9a0" font-size="13" font-family="sans-serif">上顎前歯部　唇側面観</text>
+    <text x="163" y="76" text-anchor="middle" fill="#c98a3a" font-size="11" font-family="sans-serif">▼ 11 変色歯</text>
+  </svg>`,
+
+  xray_case2: `
+  <svg viewBox="0 0 360 260" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="260" fill="#06090a"/>
+    <g fill="#cfd6d4" opacity="0.92">
+      <rect x="60" y="30" width="46" height="150" rx="14"/>
+      <rect x="112" y="26" width="48" height="158" rx="15"/>
+      <rect x="166" y="24" width="50" height="164" rx="16"/>
+      <rect x="222" y="26" width="48" height="158" rx="15"/>
+      <rect x="276" y="30" width="46" height="150" rx="14"/>
+    </g>
+    <rect x="166" y="24" width="50" height="164" rx="16" fill="none" stroke="#c98a3a" stroke-width="2.5"/>
+    <!-- apical radiolucent lesion -->
+    <ellipse cx="191" cy="172" rx="20" ry="16" fill="#06090a" opacity="0.9"/>
+    <ellipse cx="191" cy="172" rx="20" ry="16" fill="none" stroke="#7a2f28" stroke-width="1.8"/>
+    <text x="180" y="230" text-anchor="middle" fill="#9fb0ad" font-size="12" font-family="sans-serif">デンタルX線　11番　唇舌方向</text>
+    <text x="252" y="176" fill="#c98a3a" font-size="11" font-family="sans-serif">◀ 根尖部透過像</text>
+  </svg>`
+};
+
+// ============================================================
+// DentalCase アプリ本体ロジック
+// ============================================================
+
+const APP_STATE = {
+  role: null,          // "student" | "teacher"
+  userName: null,
+  currentCase: null,   // CASES[i]
+  chatHistory: [],     // [{role:"patient"|"student", text}]
+  apiBusy: false,
+};
+
+const STORAGE_PREFIX = "dentalcase";
+
+// ------------------------------------------------------------
+// Storage helpers (shared=true なので教員が学生の記録を見られる)
+// ------------------------------------------------------------
+// storageキーは空白・スラッシュ・引用符を含められないため、
+// 学生名や症例IDをそのままキーに使うと（特に日本語氏名にスペースが
+// 含まれる場合）保存に失敗する。英数字のみの安全な文字列に変換する。
+function toSafeKeyPart(str) {
+  let hash = 0;
+  const s = String(str);
+  for (let i = 0; i < s.length; i++) {
+    hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+  }
+  return "h" + hash.toString(36);
+}
+
+async function saveSessionRecord(record) {
+  const safeName = toSafeKeyPart(record.studentName);
+  const safeCaseId = toSafeKeyPart(record.caseId);
+  const key = `${STORAGE_PREFIX}:session:${safeName}:${safeCaseId}:${record.timestamp}`;
+  const valueStr = JSON.stringify(record);
+
+  // storageバックエンドの一時的なエラーに備えて、1回だけ自動リトライする
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const result = await window.storage.set(key, valueStr, true);
+      if (result) return; // 成功
+      console.error(`保存に失敗しました（resultがnull, attempt ${attempt}）`);
+    } catch (e) {
+      console.error(`保存に失敗しました（attempt ${attempt}）`, e);
+      if (attempt === 2) {
+        // 2回試しても失敗した場合のみ知らせる。
+        // 保存失敗はこの学習履歴の記録のみに影響し、
+        // 学生に表示済みのAI評価結果には影響しないことを伝える。
+        alert("学習履歴の保存に失敗しました（教員側の履歴に記録されない可能性があります）。評価結果はこのまま確認いただけます。\n詳細：" + e.message);
+      } else {
+        await new Promise(r => setTimeout(r, 800)); // 少し待ってリトライ
+      }
+    }
+  }
+}
+
+async function listAllSessionRecords() {
+  try {
+    const res = await window.storage.list(`${STORAGE_PREFIX}:session:`, true);
+    if (!res || !res.keys || res.keys.length === 0) return [];
+    const records = [];
+    for (const k of res.keys) {
+      try {
+        const got = await window.storage.get(k, true);
+        if (got && got.value) records.push(JSON.parse(got.value));
+      } catch (e) { /* skip broken entries */ }
+    }
+    return records;
+  } catch (e) {
+    console.error("一覧取得に失敗しました", e);
+    return [];
+  }
+}
+
+// ------------------------------------------------------------
+// Claude API 呼び出し
+// ------------------------------------------------------------
+async function callClaude(systemPrompt, messages, maxTokens = 600) {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages: messages,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error("API呼び出しに失敗しました: " + response.status);
+  }
+  const data = await response.json();
+  const textBlock = (data.content || []).find(b => b.type === "text");
+  return textBlock ? textBlock.text : "";
+}
+
+// テキスト中からJSONオブジェクトを抜き出してパースする関数。
+// コードブロック記号や前後の説明文が混じっていても、
+// 最初の { から対応する } までを抜き出して解析する。
+function extractJsonFromText(text) {
+  const cleaned = text.replace(/```json|```/g, "");
+  const start = cleaned.indexOf("{");
+  if (start === -1) return null;
+  let depth = 0;
+  for (let i = start; i < cleaned.length; i++) {
+    if (cleaned[i] === "{") depth++;
+    if (cleaned[i] === "}") {
+      depth--;
+      if (depth === 0) {
+        const jsonStr = cleaned.slice(start, i + 1);
+        try {
+          return JSON.parse(jsonStr);
+        } catch (e) {
+          console.error("JSON抜き出し後のパースに失敗:", e);
+          return null;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+// AIの評価をJSON形式のテキストで受け取り、パースして返す。
+async function callClaudePlainJson(systemPrompt, messages, maxTokens = 2000) {
+  const text = await callClaude(systemPrompt, messages, maxTokens);
+  const extracted = extractJsonFromText(text);
+  if (!extracted) {
+    console.error("AIの応答からJSONを読み取れませんでした:", text);
+    throw new Error("AIの応答からJSONを読み取れませんでした。応答内容：" + text.slice(0, 300));
+  }
+  return extracted;
+}
+
+// ============================================================
+// 画面遷移
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// ============================================================
+// ログイン
+// ============================================================
+function initLogin() {
+  const roleStudentBtn = document.getElementById("role-student");
+  const roleTeacherBtn = document.getElementById("role-teacher");
+  const labelName = document.getElementById("label-name");
+
+  roleStudentBtn.addEventListener("click", () => {
+    roleStudentBtn.classList.add("active");
+    roleTeacherBtn.classList.remove("active");
+    labelName.textContent = "氏名 / 学籍番号";
+    APP_STATE.role = "student";
+  });
+  roleTeacherBtn.addEventListener("click", () => {
+    roleTeacherBtn.classList.add("active");
+    roleStudentBtn.classList.remove("active");
+    labelName.textContent = "氏名（教員）";
+    APP_STATE.role = "teacher";
+  });
+  APP_STATE.role = "student";
+
+  document.getElementById("btn-login").addEventListener("click", () => {
+    const name = document.getElementById("login-name").value.trim();
+    APP_STATE.userName = name || (APP_STATE.role === "student" ? "ゲスト学生" : "ゲスト教員");
+
+    if (APP_STATE.role === "student") {
+      document.getElementById("student-welcome").textContent = `${APP_STATE.userName} さん`;
+      renderCaseList();
+      showScreen("screen-case-list");
+    } else {
+      document.getElementById("teacher-welcome").textContent = `${APP_STATE.userName} 先生`;
+      renderTeacherDashboard();
+      showScreen("screen-teacher-dash");
+    }
+  });
+
+  document.getElementById("btn-logout-1").addEventListener("click", logout);
+  document.getElementById("btn-logout-2").addEventListener("click", logout);
+}
+
+function logout() {
+  APP_STATE.role = null;
+  APP_STATE.userName = null;
+  APP_STATE.currentCase = null;
+  APP_STATE.chatHistory = [];
+  document.getElementById("login-name").value = "";
+  document.getElementById("login-pass").value = "";
+  showScreen("screen-login");
+}
+
+// ============================================================
+// 学生：症例一覧
+// ============================================================
+function renderCaseList() {
+  const scroll = document.getElementById("case-list-scroll");
+  // keep the section label, rebuild cards
+  scroll.innerHTML = `<div class="section-label">本日の症例</div>`;
+  CASES.forEach(c => {
+    const card = document.createElement("div");
+    card.className = "case-card";
+    card.innerHTML = `
+      <div class="top-row">
+        <div class="case-title">${c.title}</div>
+        <div class="case-id">${c.id}</div>
+      </div>
+      <div class="case-desc">${c.shortDesc}</div>
+      <div class="meta-row">
+        ${c.tags.map(t => `<span class="tag">${t}</span>`).join("")}
+      </div>
+    `;
+    card.addEventListener("click", () => openCase(c));
+    scroll.appendChild(card);
+  });
+}
+
+// ============================================================
+// 学生：症例ワークスペース
+// ============================================================
+function openCase(caseObj) {
+  APP_STATE.currentCase = caseObj;
+  APP_STATE.chatHistory = [];
+
+  // 前の症例で進行中だった音声認識・読み上げがあれば停止する
+  stopListening();
+  if (VOICE_STATE.recognition) VOICE_STATE.recognition.abort();
+  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+
+  document.getElementById("ws-case-title").textContent = `${caseObj.id}　${caseObj.title}`;
+  document.getElementById("ws-case-sub").textContent = caseObj.patientName;
+
+  // brief box
+  document.getElementById("brief-box").innerHTML = `
+    <div class="patient-name">${caseObj.patientName}</div>
+    <div class="patient-meta">来院理由を問診で確認しましょう</div>
+    <div class="chief-complaint">主訴：「${caseObj.chiefComplaint}」</div>
+  `;
+
+  // reset chat log with opening line from patient
+  const chatLog = document.getElementById("chat-log");
+  chatLog.innerHTML = "";
+  appendSystemNote(`${caseObj.patientName} さんが診察室に入ってきました。問診を開始してください。`);
+  appendPatientMessage(`こんにちは、よろしくお願いします。今日は…${caseObj.chiefComplaint}`);
+  APP_STATE.chatHistory.push({ role: "patient", text: `こんにちは、よろしくお願いします。今日は…${caseObj.chiefComplaint}` });
+
+  // quick chips
+  renderQuickChips(caseObj);
+
+  // images tab
+  renderImageTab(caseObj);
+
+  // reset diagnosis form
+  document.getElementById("diag-differential").value = "";
+  document.getElementById("diag-final").value = "";
+  document.getElementById("diag-rationale").value = "";
+  document.getElementById("diag-plan").value = "";
+
+  // reset to interview tab
+  switchTab("interview");
+  showScreen("screen-case-workspace");
+}
+
+function renderQuickChips(caseObj) {
+  const quickRow = document.getElementById("quick-row");
+  const chips = [
+    "いつから痛みますか？",
+    "どのような痛みですか？",
+    "冷たいもの・温かいもので痛みは変わりますか？",
+    "これまでに歯の治療を受けたことはありますか？",
+  ];
+  quickRow.innerHTML = "";
+  chips.forEach(c => {
+    const chip = document.createElement("div");
+    chip.className = "quick-chip";
+    chip.textContent = c;
+    chip.addEventListener("click", () => {
+      document.getElementById("chat-input").value = c;
+      sendChatMessage();
+    });
+    quickRow.appendChild(chip);
+  });
+}
+
+function renderImageTab(caseObj) {
+  const grid = document.getElementById("image-grid");
+  grid.innerHTML = "";
+  caseObj.images.forEach(img => {
+    const card = document.createElement("div");
+    card.className = "image-card";
+    card.innerHTML = `
+      <div class="img-wrap">${CASE_IMAGES_SVG[img.svgKey]}</div>
+      <div class="img-caption"><b>${img.title}</b><br>${img.caption}</div>
+    `;
+    grid.appendChild(card);
+  });
+  const note = document.createElement("div");
+  note.className = "lock-note";
+  note.textContent = "※ これらは模式図です。実際の臨床所見の特徴を再現したサンプル画像として参照してください。";
+  grid.parentElement.insertBefore(note, grid);
+}
+
+// ---- tabs ----
+function switchTab(tabName) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === tabName));
+  document.querySelectorAll(".bn-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === tabName));
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  document.getElementById(`panel-${tabName}`).classList.add("active");
+}
+
+function initTabs() {
+  document.querySelectorAll(".tab-btn, .bn-tab").forEach(btn => {
+    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  });
+}
+
+// ---- chat rendering ----
+function appendPatientMessage(text) {
+  const chatLog = document.getElementById("chat-log");
+
+  const wrap = document.createElement("div");
+  wrap.className = "msg-with-audio";
+
+  const bubble = document.createElement("div");
+  bubble.className = "msg patient";
+  bubble.textContent = text;
+
+  const speakBtn = document.createElement("button");
+  speakBtn.className = "speak-btn";
+  speakBtn.title = "読み上げる";
+  speakBtn.textContent = "🔊";
+  speakBtn.addEventListener("click", () => speakText(text, speakBtn));
+
+  wrap.appendChild(bubble);
+  wrap.appendChild(speakBtn);
+  chatLog.appendChild(wrap);
+  chatLog.scrollTop = chatLog.scrollHeight;
+
+  // 音声モードがONの場合は自動で読み上げる
+  if (isVoiceModeOn()) {
+    speakText(text, speakBtn);
+  }
+}
+function appendStudentMessage(text) {
+  const chatLog = document.getElementById("chat-log");
+  const div = document.createElement("div");
+  div.className = "msg student";
+  div.textContent = text;
+  chatLog.appendChild(div);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+function appendSystemNote(text) {
+  const chatLog = document.getElementById("chat-log");
+  const div = document.createElement("div");
+  div.className = "msg system-note";
+  div.textContent = text;
+  chatLog.appendChild(div);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+function showTypingIndicator() {
+  const chatLog = document.getElementById("chat-log");
+  const div = document.createElement("div");
+  div.className = "typing-dots";
+  div.id = "typing-indicator";
+  div.innerHTML = "<span></span><span></span><span></span>";
+  chatLog.appendChild(div);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+function hideTypingIndicator() {
+  const el = document.getElementById("typing-indicator");
+  if (el) el.remove();
+}
+
+// ============================================================
+// 音声モード（音声認識・音声合成）
+// ============================================================
+const VOICE_STATE = {
+  recognition: null,
+  isListening: false,
+  speechSupported: false,
+};
+
+function isVoiceModeOn() {
+  const toggle = document.getElementById("voice-mode-toggle");
+  return toggle && toggle.checked;
+}
+
+// 音声合成（テキスト読み上げ）。日本語ボイスを優先して選択する。
+function speakText(text, btnEl) {
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel(); // 前の発話があれば止めて新しいものを再生
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "ja-JP";
+  const voices = window.speechSynthesis.getVoices();
+  const jaVoice = voices.find(v => v.lang === "ja-JP") || voices.find(v => v.lang && v.lang.startsWith("ja"));
+  if (jaVoice) utter.voice = jaVoice;
+  utter.rate = 1.0;
+
+  if (btnEl) {
+    btnEl.classList.add("speaking");
+    utter.onend = () => btnEl.classList.remove("speaking");
+    utter.onerror = () => btnEl.classList.remove("speaking");
+  }
+  window.speechSynthesis.speak(utter);
+}
+
+// 音声認識（マイク入力 → テキスト化）の初期化。
+// ブラウザが対応していない場合は静かにフォールバックし、
+// マイクボタンを使えないようにする（テキスト入力は常に使える）。
+function initVoiceRecognition() {
+  const SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const micBtn = document.getElementById("btn-mic");
+
+  if (!SpeechRecognitionImpl) {
+    VOICE_STATE.speechSupported = false;
+    micBtn.disabled = true;
+    micBtn.title = "このブラウザは音声入力に対応していません（テキスト入力をご利用ください）";
+    micBtn.style.opacity = "0.4";
+    return;
+  }
+
+  VOICE_STATE.speechSupported = true;
+  const recognition = new SpeechRecognitionImpl();
+  recognition.lang = "ja-JP";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    const input = document.getElementById("chat-input");
+    input.value = transcript;
+    // 音声モードでは、認識結果を自動送信する
+    sendChatMessage();
+  };
+  recognition.onerror = (event) => {
+    console.error("音声認識エラー:", event.error);
+    stopListening();
+
+    const errorMessages = {
+      "not-allowed": "マイクの使用が許可されていません。ブラウザの設定でマイクへのアクセスを許可してください。",
+      "service-not-allowed": "マイクの使用が許可されていません。ブラウザの設定でマイクへのアクセスを許可してください。",
+      "no-speech": "音声が検出されませんでした。もう一度お試しください。",
+      "audio-capture": "マイクが見つかりません。マイクが接続されているか確認してください。",
+      "network": "音声認識サービスに接続できませんでした。通信環境を確認するか、テキスト入力をご利用ください。",
+      "aborted": null, // ユーザー操作による中断は静かに無視する
+    };
+    const message = Object.prototype.hasOwnProperty.call(errorMessages, event.error)
+      ? errorMessages[event.error]
+      : `音声認識でエラーが発生しました（${event.error}）。テキスト入力をご利用ください。`;
+    if (message) alert(message);
+  };
+  recognition.onend = () => {
+    stopListening();
+  };
+
+  VOICE_STATE.recognition = recognition;
+}
+
+function startListening() {
+  if (!VOICE_STATE.speechSupported || VOICE_STATE.isListening) return;
+  try {
+    VOICE_STATE.recognition.start();
+    VOICE_STATE.isListening = true;
+    document.getElementById("btn-mic").classList.add("listening");
+  } catch (e) {
+    console.error("音声認識の開始に失敗しました", e);
+    alert("音声認識を開始できませんでした。\n詳細：" + e.message);
+  }
+}
+function stopListening() {
+  VOICE_STATE.isListening = false;
+  const micBtn = document.getElementById("btn-mic");
+  if (micBtn) micBtn.classList.remove("listening");
+}
+
+function initVoiceModeToggle() {
+  const toggle = document.getElementById("voice-mode-toggle");
+  const workspace = document.getElementById("screen-case-workspace");
+  toggle.addEventListener("change", () => {
+    workspace.classList.toggle("voice-mode-on", toggle.checked);
+    if (toggle.checked) {
+      // 音声合成エンジンの音声リストを先読みしておく（初回は空配列になりやすいため）
+      if ("speechSynthesis" in window) window.speechSynthesis.getVoices();
+    } else {
+      stopListening();
+      if (VOICE_STATE.recognition) VOICE_STATE.recognition.abort();
+      window.speechSynthesis && window.speechSynthesis.cancel();
+    }
+  });
+
+  document.getElementById("btn-mic").addEventListener("click", () => {
+    if (VOICE_STATE.isListening) {
+      VOICE_STATE.recognition.stop();
+    } else {
+      startListening();
+    }
+  });
+}
+
+// ---- sending a chat message ----
+async function sendChatMessage() {
+  if (APP_STATE.apiBusy) return;
+  const input = document.getElementById("chat-input");
+  const text = input.value.trim();
+  if (!text) return;
+
+  appendStudentMessage(text);
+  APP_STATE.chatHistory.push({ role: "student", text });
+  input.value = "";
+  input.style.height = "auto";
+
+  const sendBtn = document.getElementById("btn-send");
+  sendBtn.disabled = true;
+  APP_STATE.apiBusy = true;
+  showTypingIndicator();
+
+  try {
+    const apiMessages = APP_STATE.chatHistory.map(m => ({
+      role: m.role === "student" ? "user" : "assistant",
+      content: m.text,
+    }));
+    const reply = await callClaude(APP_STATE.currentCase.patientSystemPrompt, apiMessages, 300);
+    hideTypingIndicator();
+    appendPatientMessage(reply);
+    APP_STATE.chatHistory.push({ role: "patient", text: reply });
+  } catch (e) {
+    hideTypingIndicator();
+    appendSystemNote("通信エラーが発生しました。もう一度お試しください。");
+    console.error(e);
+  } finally {
+    sendBtn.disabled = false;
+    APP_STATE.apiBusy = false;
+  }
+}
+
+function initChatInput() {
+  const input = document.getElementById("chat-input");
+  const sendBtn = document.getElementById("btn-send");
+  sendBtn.addEventListener("click", sendChatMessage);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendChatMessage();
+    }
+  });
+  input.addEventListener("input", () => {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 90) + "px";
+  });
+}
+
+// ============================================================
+// 診断提出 → AI評価
+// ============================================================
+function initDiagnosisSubmit() {
+  document.getElementById("btn-submit-diag").addEventListener("click", submitDiagnosis);
+  document.getElementById("btn-back-to-list").addEventListener("click", () => {
+    renderCaseList();
+    showScreen("screen-case-list");
+  });
+}
+
+async function submitDiagnosis() {
+  const differential = document.getElementById("diag-differential").value.trim();
+  const final = document.getElementById("diag-final").value.trim();
+  const rationale = document.getElementById("diag-rationale").value.trim();
+  const plan = document.getElementById("diag-plan").value.trim();
+
+  if (!final || !rationale || !plan) {
+    alert("②確定診断、③診断の根拠、④治療方針は必須項目です。入力してください。");
+    return;
+  }
+
+  const submitBtn = document.getElementById("btn-submit-diag");
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = `<span class="loading-spinner"></span> AIが評価中…`;
+
+  const caseObj = APP_STATE.currentCase;
+  const chatTranscript = APP_STATE.chatHistory
+    .map(m => `${m.role === "student" ? "学生" : "患者"}：${m.text}`)
+    .join("\n");
+
+  const evalSystemPrompt = `あなたは歯学部の臨床推論トレーニングを評価する、経験豊富な歯科臨床教育者です。
+学生が行った問診の記録と、学生が記入した診断・治療方針を、以下の「症例の正解情報」に基づいて評価してください。
+
+【症例の正解情報】
+正解診断：${caseObj.correctDiagnosis}
+重要所見：
+${caseObj.keyFindings.map(f => "- " + f).join("\n")}
+理想的に確認すべき問診項目：
+${caseObj.idealQuestions.map(q => "- " + q).join("\n")}
+
+評価結果は submit_evaluation ツールを使って送信してください。各テキスト項目は改行を含めず、1行の自然な日本語の文章として書いてください。`;
+
+  const userPrompt = `【問診の記録】
+${chatTranscript || "（問診は行われませんでした）"}
+
+【学生が記入した内容】
+鑑別診断：${differential || "（記入なし）"}
+確定診断：${final}
+診断の根拠：${rationale}
+治療方針：${plan}`;
+
+  // プレーンテキストJSON方式用のプロンプト
+  const plainJsonInstruction = `
+
+【出力形式】
+必ず以下のJSON形式のみで出力してください。説明文やMarkdownのコードブロック記号は一切付けないでください。各文字列の値には改行を含めず、1行で書いてください。
+{
+  "score": 0から100の整数,
+  "summary": "1〜2文の総評",
+  "good_points": ["評価できる点1", "評価できる点2"],
+  "missed_points": ["見落としていた点1", "見落としていた点2"],
+  "diagnosis_feedback": "診断・治療方針への詳しいフィードバック",
+  "advice": "次に活かすアドバイス"
+}`;
+
+  try {
+    // この実行環境ではtool use（構造化出力）がテキスト内に
+    // <function_calls>記法として出力されてしまい安定しないため、
+    // プレーンテキストJSON方式のみを使用する。
+    const evalResult = await callClaudePlainJson(
+      evalSystemPrompt + plainJsonInstruction,
+      [{ role: "user", content: userPrompt }],
+      2000
+    );
+
+    // persist
+    const record = {
+      studentName: APP_STATE.userName,
+      caseId: caseObj.id,
+      caseTitle: caseObj.title,
+      timestamp: Date.now(),
+      timestampReadable: new Date().toLocaleString("ja-JP"),
+      chatHistory: APP_STATE.chatHistory,
+      studentInput: { differential, final, rationale, plan },
+      evalResult,
+    };
+    await saveSessionRecord(record);
+
+    renderEvaluation(evalResult, caseObj);
+    showScreen("screen-evaluation");
+  } catch (e) {
+    console.error(e);
+    alert("評価の取得に失敗しました。通信状態を確認し、もう一度お試しください。\n詳細：" + e.message);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = "AIによる評価を受ける";
+  }
+}
+
+function renderEvaluation(evalResult, caseObj) {
+  document.getElementById("eval-case-sub").textContent = `${caseObj.id}　${caseObj.title}`;
+  const wrap = document.getElementById("eval-wrap");
+
+  const goodHtml = (evalResult.good_points || []).map(p => `<li>${escapeHtml(p)}</li>`).join("");
+  const missedHtml = (evalResult.missed_points || []).map(p => `<li>${escapeHtml(p)}</li>`).join("");
+
+  wrap.innerHTML = `
+    <div class="score-hero">
+      <div class="score-num">${evalResult.score ?? "--"}</div>
+      <div class="score-label">SCORE / 100</div>
+    </div>
+    <div class="eval-section">
+      <h4>📌 総評</h4>
+      <p>${escapeHtml(evalResult.summary || "")}</p>
+    </div>
+    <div class="eval-section good">
+      <h4>✓ 評価できる点</h4>
+      <ul>${goodHtml || "<li>特になし</li>"}</ul>
+    </div>
+    <div class="eval-section warn">
+      <h4>△ 見落としていた点</h4>
+      <ul>${missedHtml || "<li>特になし</li>"}</ul>
+    </div>
+    <div class="eval-section">
+      <h4>🩺 診断・治療方針へのフィードバック</h4>
+      <p>${escapeHtml(evalResult.diagnosis_feedback || "")}</p>
+    </div>
+    <div class="eval-section">
+      <h4>💡 次に活かすアドバイス</h4>
+      <p>${escapeHtml(evalResult.advice || "")}</p>
+    </div>
+    <button class="btn-secondary" id="btn-back-from-eval" style="margin-top:6px;">症例一覧に戻る</button>
+  `;
+  document.getElementById("btn-back-from-eval").addEventListener("click", () => {
+    renderCaseList();
+    showScreen("screen-case-list");
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
+
+function initEvalScreen() {
+  document.getElementById("btn-eval-close").addEventListener("click", () => {
+    renderCaseList();
+    showScreen("screen-case-list");
+  });
+}
+
+// ============================================================
+// 教員：ダッシュボード
+// ============================================================
+async function renderTeacherDashboard() {
+  const list = document.getElementById("student-list");
+  list.innerHTML = `<div class="empty-state"><div class="e-icon">⏳</div><div class="e-title">読み込み中…</div></div>`;
+
+  const records = await listAllSessionRecords();
+
+  if (records.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="e-icon">📭</div>
+        <div class="e-title">まだ学習記録がありません</div>
+        <div class="e-desc">学生が症例に取り組み、AI評価を完了すると、ここに記録が表示されます。</div>
+      </div>`;
+    return;
+  }
+
+  // group by student
+  const byStudent = {};
+  records.forEach(r => {
+    if (!byStudent[r.studentName]) byStudent[r.studentName] = [];
+    byStudent[r.studentName].push(r);
+  });
+
+  list.innerHTML = "";
+  Object.keys(byStudent).sort().forEach(name => {
+    const recs = byStudent[name].sort((a, b) => b.timestamp - a.timestamp);
+    const avg = Math.round(recs.reduce((sum, r) => sum + (r.evalResult.score || 0), 0) / recs.length);
+
+    const row = document.createElement("div");
+    row.className = "student-row";
+    row.innerHTML = `
+      <div class="top-row">
+        <div>
+          <div class="s-name">${escapeHtml(name)}</div>
+          <div class="s-meta">取り組み症例数：${recs.length}件</div>
+        </div>
+        <div class="avg-pill">平均 ${avg}点</div>
+      </div>
+    `;
+    row.addEventListener("click", () => openTeacherDetail(name, recs));
+    list.appendChild(row);
+  });
+}
+
+function openTeacherDetail(studentName, records) {
+  document.getElementById("td-student-name").textContent = `${studentName} さん`;
+  const scroll = document.getElementById("teacher-detail-scroll");
+  scroll.innerHTML = `<div class="section-label">学習履歴（新しい順）</div>`;
+
+  records.forEach((r, idx) => {
+    const entry = document.createElement("div");
+    entry.className = "log-entry";
+
+    const chatHtml = (r.chatHistory || []).map(m =>
+      `<div class="mini-chat-line"><b>${m.role === "student" ? "学生" : "患者"}：</b>${escapeHtml(m.text)}</div>`
+    ).join("");
+
+    entry.innerHTML = `
+      <div class="log-head">
+        <div>
+          <div class="lt">${r.caseId}　${escapeHtml(r.caseTitle)}</div>
+          <div class="ld">${r.timestampReadable} ・ スコア ${r.evalResult.score}点</div>
+        </div>
+        <div class="chevron">▶</div>
+      </div>
+      <div class="log-body">
+        <div class="section-label" style="margin-top:10px;">問診ログ</div>
+        ${chatHtml || "<p style='font-size:12.5px;color:var(--ink-soft);'>問診は行われませんでした。</p>"}
+
+        <div class="section-label">学生の診断・治療方針</div>
+        <div class="mini-chat-line"><b>鑑別診断：</b>${escapeHtml(r.studentInput.differential) || "（記入なし）"}</div>
+        <div class="mini-chat-line"><b>確定診断：</b>${escapeHtml(r.studentInput.final)}</div>
+        <div class="mini-chat-line"><b>根拠：</b>${escapeHtml(r.studentInput.rationale)}</div>
+        <div class="mini-chat-line"><b>治療方針：</b>${escapeHtml(r.studentInput.plan)}</div>
+
+        <div class="section-label">AI評価</div>
+        <div class="mini-chat-line"><b>総評：</b>${escapeHtml(r.evalResult.summary)}</div>
+        <div class="mini-chat-line"><b>フィードバック：</b>${escapeHtml(r.evalResult.diagnosis_feedback)}</div>
+      </div>
+    `;
+    entry.querySelector(".log-head").addEventListener("click", () => {
+      entry.classList.toggle("open");
+    });
+    scroll.appendChild(entry);
+  });
+
+  showScreen("screen-teacher-detail");
+}
+
+function initTeacherNav() {
+  document.getElementById("btn-teacher-back").addEventListener("click", () => {
+    renderTeacherDashboard();
+    showScreen("screen-teacher-dash");
+  });
+}
+
+// ============================================================
+// 起動
+// ============================================================
+document.addEventListener("DOMContentLoaded", () => {
+  initLogin();
+  initTabs();
+  initChatInput();
+  initDiagnosisSubmit();
+  initEvalScreen();
+  initTeacherNav();
+  initVoiceRecognition();
+  initVoiceModeToggle();
+});
+
+</script>
+</body>
+</html>
